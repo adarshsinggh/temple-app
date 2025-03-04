@@ -1,72 +1,88 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/authService';
+'use client';
 
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// Create the auth context
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const initAuth = async () => {
+    // Simulate checking authentication status
+    const checkAuth = async () => {
       try {
         setLoading(true);
+        // In a real app, you would check for a token and validate it
         const token = localStorage.getItem('token');
         
         if (token) {
-          const userData = await authService.getCurrentUser();
-          setUser(userData);
+          // Simulate fetching user data
+          // In a real app, you would make an API call to get the user data
+          setTimeout(() => {
+            setUser({ name: 'Demo User', role: 'Admin' });
+            setIsAuthenticated(true);
+            setLoading(false);
+          }, 500);
+        } else {
+          setIsAuthenticated(false);
+          setLoading(false);
         }
       } catch (err) {
         console.error('Authentication error:', err);
         setError(err.message);
-        localStorage.removeItem('token');
-      } finally {
+        setIsAuthenticated(false);
         setLoading(false);
       }
     };
 
-    initAuth();
+    checkAuth();
   }, []);
 
   const login = async (username, password) => {
     try {
       setLoading(true);
-      const { user, token } = await authService.login(username, password);
-      localStorage.setItem('token', token);
-      setUser(user);
-      return user;
+      // Simulate login API call
+      // In a real app, you would make an API call to authenticate
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const user = { name: 'Demo User', role: 'Admin' };
+          const token = 'demo-token';
+          localStorage.setItem('token', token);
+          setUser(user);
+          setIsAuthenticated(true);
+          setLoading(false);
+          resolve(user);
+        }, 1000);
+      });
     } catch (err) {
       setError(err.message);
-      throw err;
-    } finally {
       setLoading(false);
+      throw err;
     }
   };
 
   const logout = async () => {
     try {
       setLoading(true);
-      await authService.logout();
-      localStorage.removeItem('token');
-      setUser(null);
+      // Simulate logout
+      // In a real app, you would make an API call to logout
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          setUser(null);
+          setIsAuthenticated(false);
+          setLoading(false);
+          resolve();
+        }, 500);
+      });
     } catch (err) {
       setError(err.message);
-    } finally {
       setLoading(false);
-    }
-  };
-
-  const resetPassword = async (email) => {
-    try {
-      setLoading(true);
-      await authService.resetPassword(email);
-    } catch (err) {
-      setError(err.message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -74,10 +90,9 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     error,
+    isAuthenticated,
     login,
-    logout,
-    resetPassword,
-    isAuthenticated: !!user
+    logout
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -3,11 +3,6 @@ const path = require('path');
 
 module.exports = {
   reactStrictMode: true,
-  experimental: {
-    turbo: {
-      moduleIdStrategy: 'deterministic',
-    }
-  },
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
